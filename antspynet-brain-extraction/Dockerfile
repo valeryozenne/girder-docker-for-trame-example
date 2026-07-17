@@ -85,5 +85,5 @@ WORKDIR /opt/code
 ENV IMRT_DOCKER_GAUSSIAN_SIGMA=3.0
 
 COPY brain_extraction.py /opt/code/brain_extraction.py
-
+COPY structure_extraction.py /opt/code/structure_extraction.py
 ENTRYPOINT ["python3", "/opt/code/brain_extraction.py"]

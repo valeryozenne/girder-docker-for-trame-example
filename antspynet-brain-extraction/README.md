@@ -12,4 +12,7 @@ docker run -dit --gpus all -v /home/vozenne/Bureau/ToBeDeleted/ants_mnt/:/opt/in
 docker exec -ti antspynet bash
 
 
-docker run --rm --gpus all -v /home/vozenne/Bureau/ToBeDeleted/ants_mnt/:/opt/inout girder/antspynet:latest -i /opt/inout/Ax_3D_BRAVO.nii.gz -o /opt/inout/test2.nii.gz
+docker run --rm --gpus all -v /home/vozenne/Bureau/ToBeDeleted/ants_mnt/:/opt/inout girder/antspynet:latest -i /opt/inout/Ax_3D_BRAVO_resampled_to_2mm.nii.gz -o /opt/inout/brain_masked.nii.gz
+
+
+docker run --rm --gpus all -v /home/vozenne/Bureau/ToBeDeleted/ants_mnt/:/opt/inout girder/antspynet:latest -i /opt/inout/test1_strides_ok.nii.gz -m /opt/inout/mouse_brain_masked.nii.gz -t /opt/inout/mouse_output_tct.nii.gz -n /opt/inout/mouse_output_nick.nii.gz

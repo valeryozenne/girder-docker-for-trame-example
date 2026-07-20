@@ -29,6 +29,8 @@ def main():
     parser.add_argument("-i", "--input", required=True, help="Input NIfTI file")
     parser.add_argument("-o", "--output", required=True, help="Output NIfTI file")
     parser.add_argument('-c', '--contrast', nargs='?', const='t1', default='t1', help='contrast name', type=str)
+    #parser.add_argument('-d', '--directory', nargs='?', const='/opt/model/', default='/opt/model/', help='directory location', type=str)
+      
     parser.add_argument(
         "--copy-only",
         action="store_true",
@@ -42,20 +44,22 @@ def main():
 
     # get arguments
 
-    input_path = args.input
+    input_path  = args.input
     output_path = args.output
-    contrast=args.contrast
-    print("[DOCKER NIFTI APPLY GAUSSIAN VTKFILTER] input =", input_path, flush=True)
-    print("[DOCKER NIFTI APPLY GAUSSIAN VTKFILTER] output =", output_path, flush=True)
-    print("[DOCKER NIFTI APPLY GAUSSIAN VTKFILTER] sigma =", contrast, flush=True)
-    print("[DOCKER NIFTI APPLY GAUSSIAN VTKFILTER] copy_only =", bool(args.copy_only), flush=True)
+    contrast    = args.contrast
+    #directory   = args.directory
+    print("[DOCKER ANTSPYNET] input =", input_path, flush=True)
+    print("[DOCKER ANTSPYNET] output =", output_path, flush=True)
+    print("[DOCKER ANTSPYNET] contrast =", contrast, flush=True)
+    print("[DOCKER ANTSPYNET] copy_only =", bool(args.copy_only), flush=True)
+    #print("[DOCKER ANTSPYNET] antsxnet_cache_directory =", directory, flush=True)
 
     if args.copy_only:
         shutil.copyfile(input_path, output_path)
-        print("[DOCKER NIFTI APPLY GAUSSIAN VTKFILTER] copied input to output", flush=True)
-    else:
+        print("[DOCKER ANTSPYNET] copied input to output", flush=True)
+    else:        
         brain_image= ants.image_read(input_path)
-        probability_brain_mask = antspynet.brain_extraction(brain_image, modality=contrast)
+        probability_brain_mask = antspynet.brain_extraction(brain_image, modality=contrast, verbose=True  )
         ants.image_write(probability_brain_mask, output_path)
 
 if __name__ == "__main__":

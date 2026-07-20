@@ -33,7 +33,7 @@ RUN pip3 install "tensorflow==2.15.*"
 RUN pip install pandas pyyaml numpy scikit-image scikit-learn statsmodels webcolors matplotlib Pillow nibabel
 
 RUN apt-get update && \
-    apt-get install -y git vim locate tree 
+    apt-get install -y git vim locate tree figlet gosu
 
 FROM base_image AS antspy_layer
 
@@ -46,7 +46,7 @@ RUN pip install antspyx
 #RUN cd /opt/ANTsPy && \
 #    python3 setup.py install
 
-RUN python3 -m pip install antspynet
+RUN python3 -m pip install antspynet vtk
 
 ############"
 # ANTsPyNet
@@ -55,35 +55,31 @@ RUN python3 -m pip install antspynet
 FROM antspy_layer AS user_permissions_layer
 
 # Arguments pour l'UID/GID de l'utilisateur local
-#ARG USERNAME=girder
-#ARG USER_ID=1000
-#ARG GROUP_ID=1000
+ARG USERNAME=girder
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 
 # Création de l'utilisateur avec l'UID/GID passé en argument
-#RUN groupadd -g ${GROUP_ID} ${USERNAME} && \
-#    useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash ${USERNAME} && \
-#    mkdir -p /opt/code /opt/input /opt/output /opt/inout && \
-#    chown -R ${USERNAME}:${GROUP_ID} /opt/code /opt/input /opt/output /opt/inout
+RUN groupadd -g ${GROUP_ID} ${USERNAME} && \
+    useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash ${USERNAME} && \
+    mkdir -p /opt/code /opt/input /opt/output /opt/inout /opt/model /root/.keras/ /root/.keras/ANTsXNet/ && \
+    chown -R ${USERNAME}:${GROUP_ID} /opt/code /opt/input /opt/output /opt/inout /root/.keras/ /root/.keras/ANTsXNet/
 
-# prepare installation de ANTsPyNet    , une image docker de ANTsPyNet est aussi disponible  
-
-#RUN cd /opt/ && \
-#    git clone https://github.com/ANTsX/ANTsPyNet.git 	
-    
-#RUN cd /opt/ANTsPyNet && \    
-#    pip install -r requirements.txt    
-
-#RUN pip install antspynet
-
-#RUN cd /opt/ && mkdir Applications &&\
-#    cd Applications && \
-#    git clone https://github.com/ANTsXNet/BrainExtraction.git
-         
-#RUN pip install simpleITK
+FROM user_permissions_layer AS final_image
 
 WORKDIR /opt/code
 ENV IMRT_DOCKER_GAUSSIAN_SIGMA=3.0
 
 COPY brain_extraction.py /opt/code/brain_extraction.py
 COPY structure_extraction.py /opt/code/structure_extraction.py
-ENTRYPOINT ["python3", "/opt/code/brain_extraction.py"]
+COPY mask_to_surface.py /opt/code/mask_to_surface.py
+
+# Copie du script entrypoint.sh dans le conteneur
+COPY entrypoint.sh /opt/code/entrypoint.sh
+
+# Rendre le script exécutable
+RUN chmod +x /opt/code/entrypoint.sh
+
+# Définir le point d'entrée du conteneur
+ENTRYPOINT ["/opt/code/entrypoint.sh"]
+#ENTRYPOINT ["python3", "/opt/code/brain_extraction.py"]
